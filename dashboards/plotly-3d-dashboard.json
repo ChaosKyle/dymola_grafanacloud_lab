@@ -1,0 +1,276 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "config": "{\n  \"data\": [\n    {\n      \"x\": {datasource.data.*.time},\n      \"y\": {datasource.data.*.temperature},\n      \"z\": {datasource.data.*.pressure},\n      \"type\": \"scatter3d\",\n      \"mode\": \"markers+lines\",\n      \"marker\": {\n        \"size\": 3,\n        \"color\": {datasource.data.*.velocity},\n        \"colorscale\": \"Viridis\",\n        \"showscale\": true,\n        \"colorbar\": {\n          \"title\": \"Velocity\"\n        }\n      },\n      \"line\": {\n        \"width\": 2,\n        \"color\": \"rgba(31, 119, 180, 0.8)\"\n      },\n      \"name\": \"Simulation Trajectory\"\n    }\n  ],\n  \"layout\": {\n    \"title\": \"3D Simulation Trajectory\",\n    \"scene\": {\n      \"xaxis\": {\n        \"title\": \"Time (s)\"\n      },\n      \"yaxis\": {\n        \"title\": \"Temperature (°C)\"\n      },\n      \"zaxis\": {\n        \"title\": \"Pressure (kPa)\"\n      },\n      \"camera\": {\n        \"eye\": {\n          \"x\": 1.5,\n          \"y\": 1.5,\n          \"z\": 1.5\n        }\n      }\n    },\n    \"margin\": {\n      \"l\": 0,\n      \"r\": 0,\n      \"b\": 0,\n      \"t\": 30\n    }\n  }\n}",
+        "data": "url",
+        "url": "http://localhost:5000/simulations/${simulation_id}?variables=temperature,pressure,velocity"
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            },
+            {
+              "selector": "temperature", 
+              "text": "temperature",
+              "type": "number"
+            },
+            {
+              "selector": "pressure",
+              "text": "pressure", 
+              "type": "number"
+            },
+            {
+              "selector": "velocity",
+              "text": "velocity",
+              "type": "number"
+            }
+          ],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "data",
+          "source": "url",
+          "type": "json",
+          "url": "http://localhost:5000/simulations/${simulation_id}?variables=temperature,pressure,velocity",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "3D Trajectory Visualization",
+      "type": "natel-plotly-panel"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "config": "{\n  \"data\": [\n    {\n      \"z\": [],\n      \"type\": \"surface\",\n      \"colorscale\": \"Hot\",\n      \"showscale\": true,\n      \"colorbar\": {\n        \"title\": \"Temperature\"\n      }\n    }\n  ],\n  \"layout\": {\n    \"title\": \"Temperature Surface\",\n    \"scene\": {\n      \"xaxis\": {\n        \"title\": \"X Position\"\n      },\n      \"yaxis\": {\n        \"title\": \"Y Position\"\n      },\n      \"zaxis\": {\n        \"title\": \"Temperature\"\n      }\n    },\n    \"margin\": {\n      \"l\": 0,\n      \"r\": 0,\n      \"b\": 0,\n      \"t\": 30\n    }\n  }\n}",
+        "data": "url",
+        "url": "http://localhost:5000/simulations/${simulation_id}?variables=temperature"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource", 
+            "uid": "infinity"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "3D Surface Plot",
+      "type": "natel-plotly-panel"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"  
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 3,
+      "options": {
+        "config": "{\n  \"data\": [\n    {\n      \"x\": {datasource.data.*.temperature},\n      \"y\": {datasource.data.*.pressure},\n      \"mode\": \"markers\",\n      \"type\": \"scatter\",\n      \"marker\": {\n        \"size\": 8,\n        \"color\": {datasource.data.*.time},\n        \"colorscale\": \"Rainbow\",\n        \"showscale\": true,\n        \"colorbar\": {\n          \"title\": \"Time (s)\"\n        },\n        \"line\": {\n          \"width\": 1,\n          \"color\": \"rgba(0,0,0,0.3)\"\n        }\n      },\n      \"name\": \"Temperature vs Pressure\"\n    }\n  ],\n  \"layout\": {\n    \"title\": \"Temperature-Pressure Phase Space\",\n    \"xaxis\": {\n      \"title\": \"Temperature (°C)\"\n    },\n    \"yaxis\": {\n      \"title\": \"Pressure (kPa)\"\n    },\n    \"margin\": {\n      \"l\": 50,\n      \"r\": 50,\n      \"b\": 50,\n      \"t\": 50\n    }\n  }\n}",
+        "data": "url", 
+        "url": "http://localhost:5000/simulations/${simulation_id}?variables=temperature,pressure"
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            },
+            {
+              "selector": "temperature",
+              "text": "temperature", 
+              "type": "number"
+            },
+            {
+              "selector": "pressure",
+              "text": "pressure",
+              "type": "number"
+            }
+          ],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "data",
+          "source": "url",
+          "type": "json",
+          "url": "http://localhost:5000/simulations/${simulation_id}?variables=temperature,pressure",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Phase Space Analysis",
+      "type": "natel-plotly-panel"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [
+    "dymola",
+    "plotly", 
+    "3d",
+    "advanced"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "infinity"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Simulation",
+        "multi": false,
+        "name": "simulation_id",
+        "options": [],
+        "query": {
+          "columns": [
+            {
+              "selector": "id",
+              "text": "",
+              "type": "string"
+            }
+          ],
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "StandardVariableQuery",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "http://localhost:5000/simulations",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Dymola 3D Plotly Visualization",
+  "uid": "dymola-plotly-3d",
+  "version": 1,
+  "weekStart": ""
+}

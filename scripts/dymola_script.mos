@@ -1,0 +1,58 @@
+// Dymola Script for Automated Data Export
+// Run this script in Dymola to export simulation results
+
+// Function to export simulation results
+function exportSimulationResults
+  input String resultFile = "dsres.mat";
+  input String outputDir = "data/raw";
+  input String simulationName = "";
+  
+algorithm
+  // Create output directory if it doesn't exist
+  Modelica.Utilities.Files.createDirectory(outputDir);
+  
+  // Generate output filename
+  outputName := if simulationName == "" then 
+    Modelica.Utilities.Files.fullPathName(resultFile) else simulationName;
+  outputPath := outputDir + "/" + outputName + ".mat";
+  
+  // Copy result file to output directory
+  Modelica.Utilities.Files.copy(resultFile, outputPath);
+  
+  // Export to CSV format (alternative method)
+  csvPath := outputDir + "/" + outputName + ".csv";
+  
+  // Export selected variables to CSV
+  variables := {
+    "time",
+    "temperature",
+    "velocity", 
+    "position",
+    "pressure",
+    "flow_rate"
+  };
+  
+  // Write CSV header
+  csvFile := Modelica.Utilities.Files.open(csvPath, "w");
+  header := "";
+  for i in 1:size(variables, 1) loop
+    header := header + variables[i];
+    if i < size(variables, 1) then
+      header := header + ",";
+    end if;
+  end for;
+  Modelica.Utilities.Files.write(csvFile, header);
+  
+  // Note: Actual data extraction would require DyMat or similar library
+  // This is a template for the export structure
+  
+  Modelica.Utilities.Files.close(csvFile);
+  
+  Modelica.Utilities.Streams.print("Results exported to: " + outputPath);
+  Modelica.Utilities.Streams.print("CSV exported to: " + csvPath);
+
+end exportSimulationResults;
+
+// Example usage after simulation
+// simulateModel("YourModel.ModelName");
+// exportSimulationResults("dsres.mat", "data/raw", "simulation_001");

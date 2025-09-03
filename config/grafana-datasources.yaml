@@ -1,0 +1,71 @@
+# Grafana Datasource Configurations
+# Use this configuration to set up datasources in Grafana
+
+apiVersion: 1
+
+datasources:
+  # Infinity Plugin for CSV/JSON data
+  - name: Dymola-Infinity
+    type: yesoreyeram-infinity-datasource
+    uid: dymola-infinity
+    access: proxy
+    isDefault: false
+    jsonData:
+      # Default timeout for requests
+      timeout: 30
+      # Authentication method (none, basic, api_key)
+      auth_method: none
+      # Allow self-signed certificates  
+      tls_skip_verify: true
+    secureJsonData: {}
+    version: 1
+    editable: true
+
+  # Prometheus for OpenTelemetry metrics
+  - name: Dymola-Metrics
+    type: prometheus
+    uid: dymola-metrics
+    access: proxy
+    url: http://localhost:5001
+    isDefault: false
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+      httpMethod: GET
+    version: 1
+    editable: true
+
+  # Grafana Cloud Prometheus (if using cloud metrics)
+  - name: Grafana-Cloud-Prometheus
+    type: prometheus
+    uid: grafana-cloud-prometheus
+    access: proxy
+    url: ${GRAFANA_CLOUD_PROMETHEUS_URL}
+    basicAuth: true
+    basicAuthUser: ${GRAFANA_CLOUD_PROMETHEUS_USER}
+    isDefault: false
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+      httpMethod: GET
+    secureJsonData:
+      basicAuthPassword: ${GRAFANA_CLOUD_API_KEY}
+    version: 1
+    editable: true
+
+  # Grafana Cloud Loki (if using cloud logs)
+  - name: Grafana-Cloud-Loki
+    type: loki
+    uid: grafana-cloud-loki
+    access: proxy
+    url: ${GRAFANA_CLOUD_LOKI_URL}
+    basicAuth: true
+    basicAuthUser: ${GRAFANA_CLOUD_LOKI_USER}
+    isDefault: false
+    jsonData:
+      maxLines: 1000
+      timeout: 60
+    secureJsonData:
+      basicAuthPassword: ${GRAFANA_CLOUD_API_KEY}
+    version: 1
+    editable: true

@@ -1,0 +1,197 @@
+// OpenTelemetry Alloy Configuration for Dymola Data Collection
+// This configuration monitors Dymola simulation files and exports metrics
+
+// Logging configuration
+logging {
+    level  = "info"
+    format = "logfmt"
+}
+
+// File monitoring for new simulation data
+local.file_match "dymola_files" {
+    path_targets = [
+        {
+            __path__ = "/Users/kyleshelton/Lobby/dymola_grafanacloud_lab/data/processed/*.csv",
+            job      = "dymola-simulations",
+            type     = "simulation-data",
+        },
+        {
+            __path__ = "/Users/kyleshelton/Lobby/dymola_grafanacloud_lab/data/metadata/*.json",
+            job      = "dymola-metadata",
+            type     = "simulation-metadata",
+        }
+    ]
+}
+
+// Prometheus scraping for local metrics server
+prometheus.scrape "local_metrics" {
+    targets = [
+        {"__address__" = "localhost:5000"},
+    ]
+    
+    forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+    
+    scrape_interval = "15s"
+    metrics_path    = "/metrics"
+    
+    // Add custom labels
+    job_name = "dymola-metrics-server"
+}
+
+// File monitoring for simulation files
+loki.source.file "dymola_logs" {
+    targets    = local.file_match.dymola_files.targets
+    forward_to = [loki.process.dymola_parser.receiver]
+}
+
+// Process Dymola simulation metadata
+loki.process "dymola_parser" {
+    forward_to = [loki.write.grafana_cloud.receiver]
+    
+    stage.json {
+        expressions = {
+            simulation_name = "simulation_name",
+            timestamp       = "export_timestamp", 
+            variables       = "variables",
+            data_points     = "data_points",
+            duration        = "time_range.duration",
+        }
+    }
+    
+    stage.labels {
+        values = {
+            simulation_name = "",
+            job             = "dymola-simulations",
+        }
+    }
+    
+    stage.metrics {
+        simulation_duration_seconds {
+            type   = "gauge"
+            source = "duration"
+        }
+        
+        simulation_data_points {
+            type   = "gauge"
+            source = "data_points"
+        }
+        
+        simulation_variables_count {
+            type   = "gauge"
+            source = "len(variables)"
+        }
+    }
+}
+
+// Custom metrics from CSV file analysis
+prometheus.scrape "csv_metrics" {
+    targets = [
+        {"__address__" = "localhost:5001", "__metrics_path__" = "/csv-metrics"},
+    ]
+    
+    forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+    
+    scrape_interval = "30s"
+    job_name = "dymola-csv-analyzer"
+}
+
+// Grafana Cloud remote write configuration
+prometheus.remote_write "grafana_cloud" {
+    endpoint {
+        url = env("GRAFANA_CLOUD_PROMETHEUS_URL")
+        
+        basic_auth {
+            username = env("GRAFANA_CLOUD_PROMETHEUS_USER")
+            password = env("GRAFANA_CLOUD_API_KEY")
+        }
+        
+        queue_config {
+            capacity             = 10000
+            max_samples_per_send = 2000
+            batch_send_deadline  = "5s"
+        }
+        
+        metadata_config {
+            send         = true
+            send_interval = "1m"
+        }
+    }
+}
+
+// Grafana Cloud Loki write configuration
+loki.write "grafana_cloud" {
+    endpoint {
+        url = env("GRAFANA_CLOUD_LOKI_URL")
+        
+        basic_auth {
+            username = env("GRAFANA_CLOUD_LOKI_USER")  
+            password = env("GRAFANA_CLOUD_API_KEY")
+        }
+        
+        // Tenant ID for multi-tenancy (if needed)
+        tenant_id = env("GRAFANA_CLOUD_TENANT_ID")
+    }
+}
+
+// File watcher for real-time CSV processing
+local.file_match "csv_watcher" {
+    path_targets = [
+        {
+            __path__        = "/Users/kyleshelton/Lobby/dymola_grafanacloud_lab/data/processed/**/*.csv",
+            job             = "csv-processor",
+            simulation_type = "dymola",
+        }
+    ]
+}
+
+// Export CSV metrics via HTTP endpoint
+prometheus.exporter.unix "system" {
+    // System metrics for monitoring the collection system
+}
+
+prometheus.scrape "system_metrics" {
+    targets    = prometheus.exporter.unix.system.targets
+    forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+    job_name   = "alloy-system"
+}
+
+// Discovery for dynamic file monitoring
+discovery.file "simulation_configs" {
+    files = ["/Users/kyleshelton/Lobby/dymola_grafanacloud_lab/config/simulation-targets.json"]
+    refresh_interval = "1m"
+}
+
+// HTTP server for health checks and status
+http {
+    listen_address = "0.0.0.0:12345"
+}
+
+// Trace collection (optional, for detailed observability)
+otelcol.receiver.otlp "dymola_traces" {
+    grpc {
+        endpoint = "0.0.0.0:4317"
+    }
+    
+    http {
+        endpoint = "0.0.0.0:4318"
+    }
+    
+    output {
+        traces = [otelcol.exporter.otlp.grafana_cloud.input]
+    }
+}
+
+otelcol.exporter.otlp "grafana_cloud" {
+    client {
+        endpoint = env("GRAFANA_CLOUD_OTLP_ENDPOINT")
+        
+        auth {
+            authenticator = otelcol.auth.basic.grafana_cloud.handler
+        }
+    }
+}
+
+otelcol.auth.basic "grafana_cloud" {
+    username = env("GRAFANA_CLOUD_OTLP_USER")
+    password = env("GRAFANA_CLOUD_API_KEY")
+}

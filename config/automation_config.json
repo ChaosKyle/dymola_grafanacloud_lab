@@ -1,0 +1,44 @@
+{
+  "watch_directories": [
+    "data/raw",
+    "/path/to/dymola/output"
+  ],
+  "processed_dir": "data/processed",
+  "data_dir": "data",
+  "processing_interval": 5,
+  "cleanup_interval": 3600,
+  "archive_after_days": 30,
+  "grafana_webhook_url": null,
+  "notification_settings": {
+    "enable_slack": false,
+    "slack_webhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "enable_email": false,
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "email_from": "automation@yourcompany.com",
+    "email_to": ["team@yourcompany.com"]
+  },
+  "processing_options": {
+    "auto_convert_mat_to_csv": true,
+    "auto_organize_files": true,
+    "generate_metadata": true,
+    "create_thumbnails": false
+  },
+  "performance_settings": {
+    "max_concurrent_processing": 3,
+    "memory_limit_mb": 1024,
+    "processing_timeout_seconds": 300
+  },
+  "quality_checks": {
+    "min_file_size_bytes": 1024,
+    "max_file_age_hours": 24,
+    "verify_mat_format": true,
+    "check_variable_count": true
+  },
+  "integration_settings": {
+    "grafana_api_url": "http://localhost:3000/api",
+    "grafana_api_token": null,
+    "alloy_metrics_url": "http://localhost:5001/metrics",
+    "data_server_url": "http://localhost:5000"
+  }
+}
